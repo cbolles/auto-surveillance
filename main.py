@@ -6,6 +6,8 @@ from surveillance.environment import Environment
 from surveillance.sensors.base import Sensor
 from surveillance.sensors.factory import SensorFactory
 import matplotlib.pyplot as plt
+from time import sleep
+import numpy as np
 
 
 def main():
@@ -16,12 +18,13 @@ def main():
     args = parser.parse_args()
 
     # Setup the viewing
-    _, ax = plt.subplots()
+    fig, ax = plt.subplots()
 
     # Parse the config
     config = yaml.load(args.config, Loader=yaml.Loader)
 
     pixel_to_cm = config['environment']['map']['pixel_to_cm']
+    max_timesteps = config['environment'].get('max_timesteps', np.inf)
 
     # Pull in the test adversaries
     adversaries: List[Adversary] = []
@@ -46,17 +49,37 @@ def main():
     for adversary in adversaries:
         adversary.place(350, 211)
 
-    # TODO: Add in update loop
+    # Simulation loop
+    timestep = 0
+    print(max_timesteps)
+    while timestep < max_timesteps:
+        print('Timestep: {}'.format(timestep))
+        plt.cla()
+        # for stopping simulation with the esc key.
+        plt.gcf().canvas.mpl_connect(
+            'key_release_event',
+            lambda event: [exit(0) if event.key == 'escape' else None])
 
-    # Display the setup
-    environment.display(ax)
-    for sensor in sensors:
-        sensor.display(ax)
-    for adversary in adversaries:
-        adversary.display(ax)
-    for sensor in sensors:
-        if sensor.advisary_detected():
-            print('Adversary detected by sensor')
+        # Display the environment
+        environment.display(ax)
+
+        # Visualize the sensors
+        for sensor in sensors:
+            sensor.display(ax)
+
+        # Visualize the adversaries
+        for adversary in adversaries:
+            adversary.display(ax)
+
+        # Detect adversaries
+        for sensor in sensors:
+            if sensor.advisary_detected():
+                print('Adversary detected by sensor in timestep {}'.format(
+                    timestep))
+
+        # Update loop
+        plt.pause(0.0001)
+        timestep += 1
 
     plt.show()
 

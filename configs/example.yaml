@@ -2,6 +2,7 @@ environment:
   map:
     image: assets/basic_room.png
     pixel_to_cm: 1
+  max_timesteps: 500
 sensors:
   - type: Line
 adversaries:
