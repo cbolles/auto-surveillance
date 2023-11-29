@@ -44,5 +44,8 @@ class LineSensor(Sensor):
         ax.plot([start_point_x, end_point_x], [start_point_y, end_point_y],
                 'b-')
 
+        # Plot a point at the start
+        ax.plot(start_point_x, start_point_y, 'bo')
+
     def advisary_detected(self) -> bool:
         return False
