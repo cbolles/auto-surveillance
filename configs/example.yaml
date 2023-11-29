@@ -2,3 +2,5 @@ environment:
   map:
     image: assets/basic_room.png
     pixel_to_cm: 1
+sensors:
+  - type: Line

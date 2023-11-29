@@ -1,5 +1,6 @@
 import cv2 as cv
 import matplotlib.pyplot as plt
+from matplotlib.axes._axes import Axes
 
 
 class Environment:
@@ -17,7 +18,7 @@ class Environment:
         # Store the map
         self.map = image
 
-    def display(self, ax) -> None:
+    def display(self, ax: Axes) -> None:
         """
         Display the map of the environment
         """
