@@ -1,6 +1,9 @@
 import cv2 as cv
 import matplotlib.pyplot as plt
 from matplotlib.axes._axes import Axes
+from typing import List
+
+from surveillance.adversary import Adversary
 
 
 class Environment:
@@ -10,11 +13,14 @@ class Environment:
     representing an occupied space and pixels with values of "0" being
     empty space.
     """
-    def __init__(self, map_file: str, pixel_to_cm: float):
+    def __init__(self, map_file: str, pixel_to_cm: float,
+                 advisaries: List[Adversary]):
         # Open up the map and convert the pixel values to values of 0 and 1
         image = cv.imread(map_file, cv.IMREAD_GRAYSCALE)
         image = cv.threshold(image, 127, 255, cv.THRESH_BINARY)[1]
         image = image / 255
+
+        self.advisaries = advisaries
 
         # Store the map
         self.map = image
@@ -43,3 +49,12 @@ class Environment:
         x_coordinate = int(x * self.cm_to_pixel)
         y_coordinate = int(y * self.cm_to_pixel)
         return self.map[y_coordinate, x_coordinate] == 0
+
+    def in_adversary(self, x: float, y: float) -> bool:
+        """
+        Check if a given point is within an adversary
+        """
+        for adversary in self.advisaries:
+            if adversary.in_adversary(x, y):
+                return True
+        return False

@@ -4,3 +4,5 @@ environment:
     pixel_to_cm: 1
 sensors:
   - type: Line
+adversaries:
+  - radius: 10

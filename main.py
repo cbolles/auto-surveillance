@@ -1,6 +1,7 @@
 import argparse
 import yaml
 from typing import List
+from surveillance.adversary import Adversary
 from surveillance.environment import Environment
 from surveillance.sensors.base import Sensor
 from surveillance.sensors.factory import SensorFactory
@@ -15,16 +16,21 @@ def main():
     args = parser.parse_args()
 
     # Setup the viewing
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
 
     # Parse the config
     config = yaml.load(args.config, Loader=yaml.Loader)
 
-    # Create the environment
     pixel_to_cm = config['environment']['map']['pixel_to_cm']
+
+    # Pull in the test adversaries
+    adversaries: List[Adversary] = []
+    for adversary_config in config['adversaries']:
+        adversaries.append(Adversary(pixel_to_cm, adversary_config))
+
+    # Create the environment
     environment = Environment(config['environment']['map']['image'],
-                              pixel_to_cm)
-    environment.display(ax)
+                              pixel_to_cm, adversaries)
 
     # Construct the various sensors
     sensors: List[Sensor] = []
@@ -37,9 +43,21 @@ def main():
         # TODO: Remove hard coded value
         sensor.place(318, 200, 0)
 
-    # Loop over, updating the state
+    for adversary in adversaries:
+        adversary.place(350, 211)
+
+    # TODO: Add in update loop
+
+    # Display the setup
+    environment.display(ax)
     for sensor in sensors:
         sensor.display(ax)
+    for adversary in adversaries:
+        adversary.display(ax)
+    for sensor in sensors:
+        if sensor.advisary_detected():
+            print('Adversary detected by sensor')
+
     plt.show()
 
 
