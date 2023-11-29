@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
 from matplotlib.axes._axes import Axes
+
 from surveillance.environment import Environment
 
 
 class Sensor(ABC):
-    def __init__(self, pixel_to_cm: float, config):
+    def __init__(self, pixel_to_cm: float, environment: Environment, config):
         """
 
         :param pixel_to_cm: How each pixel in the map maps to CMs
@@ -12,6 +13,8 @@ class Sensor(ABC):
         self.x = None
         self.y = None
         self.theta = None
+
+        self.environment = environment
 
         self.cm_to_pixel = 1 / pixel_to_cm
 
@@ -23,7 +26,7 @@ class Sensor(ABC):
         pass
 
     @abstractmethod
-    def advisary_detected(self, env: Environment) -> bool:
+    def advisary_detected(self) -> bool:
         """
         Determine if an advisary is detected by the given sensor
         """

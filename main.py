@@ -22,21 +22,24 @@ def main():
 
     # Create the environment
     pixel_to_cm = config['environment']['map']['pixel_to_cm']
-    environment = Environment(config['environment']['map']['image'])
+    environment = Environment(config['environment']['map']['image'],
+                              pixel_to_cm)
     environment.display(ax)
 
     # Construct the various sensors
     sensors: List[Sensor] = []
-    sensor_factory = SensorFactory(pixel_to_cm)
+    sensor_factory = SensorFactory(pixel_to_cm, environment)
     for sensor_config in config['sensors']:
         sensors.append(sensor_factory.construct(sensor_config))
 
     # Determine the ideal positions
     for sensor in sensors:
         # TODO: Remove hard coded value
-        sensor.place(350, 200, 0)
+        sensor.place(318, 200, 0)
 
     # Loop over, updating the state
+    for sensor in sensors:
+        sensor.display(ax)
     plt.show()
 
 

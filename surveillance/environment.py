@@ -10,16 +10,36 @@ class Environment:
     representing an occupied space and pixels with values of "0" being
     empty space.
     """
-    def __init__(self, map_file: str):
+    def __init__(self, map_file: str, pixel_to_cm: float):
         # Open up the map and convert the pixel values to values of 0 and 1
         image = cv.imread(map_file, cv.IMREAD_GRAYSCALE)
         image = cv.threshold(image, 127, 255, cv.THRESH_BINARY)[1]
+        image = image / 255
 
         # Store the map
         self.map = image
+
+        self.cm_to_pixel = 1 / pixel_to_cm
 
     def display(self, ax: Axes) -> None:
         """
         Display the map of the environment
         """
         ax.imshow(self.map, cmap=plt.cm.gray)
+
+    def in_environment(self, x: float, y: float) -> bool:
+        """
+        Check if a given point is within the bounds of the environment
+        """
+        x_coordinate = int(x * self.cm_to_pixel)
+        y_coordinate = int(y * self.cm_to_pixel)
+        return 0 <= x_coordinate < self.map.shape[1] and \
+            0 <= y_coordinate < self.map.shape[0]
+
+    def in_object(self, x: float, y: float) -> bool:
+        """
+        Check if a given point is within an object
+        """
+        x_coordinate = int(x * self.cm_to_pixel)
+        y_coordinate = int(y * self.cm_to_pixel)
+        return self.map[y_coordinate, x_coordinate] == 0
