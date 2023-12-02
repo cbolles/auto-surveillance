@@ -98,7 +98,7 @@ class CameraSensor(Sensor):
                 next_y = self.y + distance * np.sin(self.theta)
 
                 # Check if the next point is in the adversary
-                if self.environment.in_adversary(next_x, next_y):
+                if adversary_pool.in_adversary(next_x, next_y):
                     return True
 
         return False

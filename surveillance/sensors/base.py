@@ -8,6 +8,7 @@ class Sensor(SurveillanceObject):
     def __init__(self, pixel_to_cm: float, environment: Environment, config):
         super().__init__(pixel_to_cm)
         self.environment = environment
+        self.name = config.get('name', 'Unknown Sensor')
 
     @abstractmethod
     def adversary_detected(self, adversary_pool: AdversaryPool) -> bool:

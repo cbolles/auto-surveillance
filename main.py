@@ -77,8 +77,8 @@ def main():
         # Detect adversaries
         for sensor in sensors:
             if sensor.adversary_detected(adversary_pool):
-                print('Adversary detected by sensor in timestep {}'.format(
-                    timestep))
+                print('Adversary detected by sensor {}'.format(
+                    sensor.name))
 
         # Update sensors
         for sensor in sensors:
