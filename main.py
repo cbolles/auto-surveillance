@@ -25,17 +25,18 @@ def main():
     pixel_to_cm = config['environment']['map']['pixel_to_cm']
     max_timesteps = config['environment'].get('max_timesteps', np.inf)
 
-    # Pull in the test adversaries
-    adversaries: List[Adversary] = []
-    for adversary_config in config['adversaries']:
-        adversaries.append(Adversary(pixel_to_cm, adversary_config))
-
-    # Create adversary pool
-    adversary_pool = AdversaryPool(adversaries)
-
     # Create the environment
     environment = Environment(config['environment']['map']['image'],
                               pixel_to_cm)
+
+    # Pull in the test adversaries
+    adversaries: List[Adversary] = []
+    for adversary_config in config['adversaries']:
+        adversaries.append(Adversary(pixel_to_cm, adversary_config,
+                                     environment))
+
+    # Create adversary pool
+    adversary_pool = AdversaryPool(adversaries)
 
     # Construct the various sensors
     sensors: List[Sensor] = []

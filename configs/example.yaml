@@ -7,3 +7,4 @@ sensors:
   - type: Line
 adversaries:
   - radius: 10
+    speed: 5
