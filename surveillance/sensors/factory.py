@@ -1,6 +1,7 @@
 from surveillance.environment import Environment
 from surveillance.sensors.base import Sensor
 from surveillance.sensors.line import LineSensor
+from surveillance.sensors.camera import CameraSensor
 
 
 class SensorFactory:
@@ -18,5 +19,7 @@ class SensorFactory:
         """
         if config['type'] == 'Line':
             return LineSensor(self.pixel_to_cm, self.environment, config)
+        if config['type'] == 'Camera':
+            return CameraSensor(self.pixel_to_cm, self.environment, config)
         else:
             raise Exception('Unsupported type: {}'.format(config['type']))
