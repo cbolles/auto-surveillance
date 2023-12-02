@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from surveillance.environment import Environment
 from surveillance.base import SurveillanceObject
+from surveillance.adversary import AdversaryPool
 
 
 class Sensor(SurveillanceObject):
@@ -9,7 +10,7 @@ class Sensor(SurveillanceObject):
         self.environment = environment
 
     @abstractmethod
-    def adversary_detected(self) -> bool:
+    def adversary_detected(self, adversary_pool: AdversaryPool) -> bool:
         """
         Determine if an advisary is detected by the given sensor
         """

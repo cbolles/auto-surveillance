@@ -1,7 +1,7 @@
 import argparse
 import yaml
 from typing import List
-from surveillance.adversary import Adversary
+from surveillance.adversary import Adversary, AdversaryPool
 from surveillance.environment import Environment
 from surveillance.sensors.base import Sensor
 from surveillance.sensors.factory import SensorFactory
@@ -30,9 +30,12 @@ def main():
     for adversary_config in config['adversaries']:
         adversaries.append(Adversary(pixel_to_cm, adversary_config))
 
+    # Create adversary pool
+    adversary_pool = AdversaryPool(adversaries)
+
     # Create the environment
     environment = Environment(config['environment']['map']['image'],
-                              pixel_to_cm, adversaries)
+                              pixel_to_cm)
 
     # Construct the various sensors
     sensors: List[Sensor] = []
@@ -46,7 +49,7 @@ def main():
         sensor.place(318, 200, 0)
 
     for adversary in adversaries:
-        adversary.place(350, 211, 0)
+        adversary.place(350, 210, 0)
 
     # Simulation loop
     timestep = 0
@@ -72,7 +75,7 @@ def main():
 
         # Detect adversaries
         for sensor in sensors:
-            if sensor.adversary_detected():
+            if sensor.adversary_detected(adversary_pool):
                 print('Adversary detected by sensor in timestep {}'.format(
                     timestep))
 
