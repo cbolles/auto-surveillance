@@ -101,3 +101,9 @@ class CameraSensor(Sensor):
                     return True
 
         return False
+
+    def update(self) -> None:
+        """
+        Camera doesn't update between time steps
+        """
+        pass

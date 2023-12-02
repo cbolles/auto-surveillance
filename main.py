@@ -6,7 +6,6 @@ from surveillance.environment import Environment
 from surveillance.sensors.base import Sensor
 from surveillance.sensors.factory import SensorFactory
 import matplotlib.pyplot as plt
-from time import sleep
 import numpy as np
 
 
@@ -47,7 +46,7 @@ def main():
         sensor.place(318, 200, 0)
 
     for adversary in adversaries:
-        adversary.place(350, 211)
+        adversary.place(350, 211, 0)
 
     # Simulation loop
     timestep = 0
@@ -73,9 +72,17 @@ def main():
 
         # Detect adversaries
         for sensor in sensors:
-            if sensor.advisary_detected():
+            if sensor.adversary_detected():
                 print('Adversary detected by sensor in timestep {}'.format(
                     timestep))
+
+        # Update sensors
+        for sensor in sensors:
+            sensor.update()
+
+        # Update adversaries
+        for adversary in adversaries:
+            adversary.update()
 
         # Update loop
         plt.pause(0.0001)
