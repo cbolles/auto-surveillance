@@ -2,11 +2,14 @@ from typing import List, Tuple
 import itertools
 import copy
 import statistics
+import math
+
+import numpy as np
 
 from surveillance.environment import Environment
 from surveillance.sensors.base import Sensor, SensorType
 from surveillance.placement.step import PlacementStep, PlacementResult, Placement
-from surveillance.helpers import _get_hallways, _get_number_cycles, _get_sub_graph_sizes
+from surveillance.helpers import _get_hallways, _get_number_cycles, _get_sub_graph_sizes, Pose
 
 
 class LineSensorPlacement(PlacementStep):
@@ -133,7 +136,43 @@ class LineSensorPlacement(PlacementStep):
 
         placements = []
         for (index, node) in enumerate(lowest_std):
-            # TODO: Replace with translation logic for node location to pose
-            placements.append(Placement(line_sensors[index], self.environment.room_map.reduced_graph[node]['pos']))
+            x_map = self.environment.room_map.reduced_graph[node]['pos'][0] * self.environment.room_map.BOX_SIZE
+            y_map = self.environment.room_map.reduced_graph[node]['pos'][1] * self.environment.room_map.BOX_SIZE
+
+            # First try ray tracing in the x direction
+            theta = np.pi
+            distance = 0
+            found_wall = False
+            while distance < self.environment.room_map.BOX_SIZE:
+                distance += 1
+
+                x = x_map + distance * math.cos(theta)
+                y = y_map + distance * math.sin(theta)
+
+                if self.environment.in_object(x, y):
+                    found_wall = True
+                    x = x_map + (distance - 1) * math.cos(theta)
+                    y = y_map + (distance - 1) * math.sin(theta)
+                    theta = 0
+                    break
+
+            if not found_wall:
+                # Now try ray tracing in the y direction
+                theta = 3 * np.pi / 2
+                distance = 0
+                while distance < self.environment.room_map.BOX_SIZE:
+                    distance += 1
+
+                    x = x_map + distance * math.cos(theta)
+                    y = y_map + distance * math.sin(theta)
+
+                    if self.environment.in_object(x, y):
+                        found_wall = True
+                        x = x_map + (distance - 1) * math.cos(theta)
+                        y = y_map + (distance - 1) * math.sin(theta)
+                        theta = np.pi / 2
+                        break
+
+            placements.append(Placement(line_sensors[index], pose=Pose(x, y, theta)))
 
         return PlacementResult(graph=graph, placements=placements)

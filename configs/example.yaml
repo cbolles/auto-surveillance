@@ -9,12 +9,6 @@ sensors:
     name: Line A
   - type: Line
     name: Line B
-  - type: Robot
-    name: Robot A
-    fov_angle: 90
-    range: 50
-    speed: 10
-    angle_resolution: 2
 
 adversaries:
   - radius: 10

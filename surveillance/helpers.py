@@ -8,7 +8,6 @@ from surveillance.roombuilder.roombuilder import RoomMap
 class Pose:
     x: float
     y: float
-    z: float
     theta: float
 
 

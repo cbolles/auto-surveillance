@@ -51,11 +51,12 @@ def main():
     # Determine the ideal positions
     placer = Placement(environment)
     placements = placer.get_placement(sensors)
-    placements
+    print(placements)
 
-    for sensor in sensors:
+    for placement in placements.placements:
         # TODO: Remove hard coded value
-        sensor.place(318, 200, 0)
+        print(placement.pose)
+        placement.sensor.place(placement.pose.x, placement.pose.y, placement.pose.theta)
 
     for adversary in adversaries:
         adversary.place(350, 210, 0)
