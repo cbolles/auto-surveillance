@@ -6,6 +6,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 import copy
 from typing import List
+import pickle
+
+
+class RenameUnpickler(pickle.Unpickler):
+    def find_class(self, module, name):
+        renamed_module = module
+        if module == 'roombuilder':
+            renamed_module = 'surveillance.roombuilder.roombuilder'
+
+        return super(RenameUnpickler, self).find_class(renamed_module, name)
 
 
 class RoomMap:
@@ -43,6 +53,20 @@ class RoomMap:
         # Create image PNG file
         img = img * 255  # Convert 0-1 grayscale to 0-255 grayscale
         cv.imwrite(filename, img)
+
+    def save(self, filename: str) -> None:
+        """
+        Serialize this object to a file
+        """
+        with open(filename, 'wb') as f:
+            pickle.dump(self, f)
+
+    def load(filename: str):
+        """
+        Load a serialized RoomMap object from a file
+        """
+        with open(filename, 'rb') as f:
+            return RenameUnpickler(f).load()
 
     def make_graph(self) -> dict:
         """

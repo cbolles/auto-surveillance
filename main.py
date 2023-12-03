@@ -27,7 +27,8 @@ def main():
 
     # Create the environment
     environment = Environment(config['environment']['map']['image'],
-                              pixel_to_cm)
+                              pixel_to_cm,
+                              config['environment']['map']['graph'])
 
     # Pull in the test adversaries
     adversaries: List[Adversary] = []

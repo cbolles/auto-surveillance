@@ -5,7 +5,7 @@ Testing the Room Builder
 from roombuilder import RoomMap
 
 # Box grid: 0 is solid, 1 is empty, 2 is marker (considered empty)
-big_map = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], # 20 x 15
+big_map = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],  # 20 x 15
            [0,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0],
            [0,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0],
            [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
@@ -51,10 +51,15 @@ very_large_map = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
                   [0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1,1,0],
                   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]
 
+""" Commented out for now to just have the map generation
 for map in [small_map, big_map, very_large_map]:
     room = RoomMap(map)
     room.plot_map()
     room.plot_map(plot_grid=True, plot_graph=True, plot_reduced_graph=False, apply_color=True)
     room.plot_map(plot_grid=True, plot_graph=False, plot_reduced_graph=True, apply_color=True)
+"""
 
-RoomMap(big_map).make_map_image("big_map.png")
+# Generate and store a specific map
+room = RoomMap(big_map)
+room.make_map_image("assets/big_map.png")
+room.save('assets/big_map.pickle')
