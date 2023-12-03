@@ -1,11 +1,11 @@
 """
 Used for making room maps and graphs
 """
-
 import cv2 as cv
 import matplotlib.pyplot as plt
 import numpy as np
 import copy
+
 
 class RoomMap:
     def __init__(self, box_matrix):
@@ -54,10 +54,12 @@ class RoomMap:
         for x in range(len(self.map)):
             for y in range(len(self.map[x])):
                 if self.map[x][y] != 0:
-                    graph[nodes[x][y]] = {'pos': tuple([y, x]),
-                                          'neighbors': [], # Contains all neighbors of the node
-                                          'nbr_str': [], # Contains neighbors directly up, down, left and right
-                                          'nbr_diag': []} # Contains neighbors that connect diagonally
+                    graph[nodes[x][y]] = {
+                        'pos': tuple([y, x]),
+                        'neighbors': [],  # Contains all neighbors of the node
+                        'nbr_str': [],  # Contains neighbors directly up, down, left and right
+                        'nbr_diag': []
+                    }  # Contains neighbors that connect diagonally
                     neighbors = [(x-1, y), (x, y-1), (x+1, y), (x, y+1)]
                     for pos in neighbors:
                         if self.map[pos[0]][pos[1]] != 0:
@@ -66,8 +68,12 @@ class RoomMap:
 
                     # Check diagonal conectivity:
                     diagonals = [(x-1, y-1), (x+1, y-1), (x-1, y+1), (x+1, y+1)]
-                    corners = [[(x-1, y),(x, y-1)], [(x+1, y),(x, y-1)],
-                               [(x-1, y),(x, y+1)], [(x+1, y),(x, y+1)]]
+                    corners = [
+                        [(x - 1, y), (x, y - 1)],
+                        [(x + 1, y), (x, y - 1)],
+                        [(x - 1, y), (x, y + 1)],
+                        [(x + 1, y), (x, y + 1)]
+                    ]
                     for i, pos in enumerate(diagonals):
                         if self.map[pos[0]][pos[1]] != 0:
                             if (self.map[corners[i][0][0]][corners[i][0][1]] != 0) and \
@@ -84,7 +90,7 @@ class RoomMap:
         """
 
         G = self.graph
-        type = 'default' # Default type for node
+        type = 'default'  # Default type for node
 
         # For nodes with two straight neighbors, get neighbor coordinates and check geometry
         aligned = True
@@ -132,8 +138,6 @@ class RoomMap:
         (Room cluster nodes = room nodes and corner nodes)
         False otherwise
         """
-
-        G = self.graph
         type = self._identify_node(node)
 
         # Room nodes
@@ -151,8 +155,6 @@ class RoomMap:
         Returns True if given node is part of a straight hallway in the main graph
         False otherwise
         """
-
-        G = self.graph
         type = self._identify_node(node)
 
         # Room nodes
@@ -168,13 +170,12 @@ class RoomMap:
         parent nodes or terminate at any goal node. Fully explores the entire connected
         component of G that is accessible from given node.
         """
-
-        Q = [] # Queue
-        explored = [node] # List of explored nodes
+        Q = []  # Queue
+        explored = [node]  # List of explored nodes
         Q.append(node)
 
         while len(Q) != 0:
-            v = Q.pop(0) # Exctract node
+            v = Q.pop(0)  # Exctract node
             for nbr in G[v]['neighbors']:
                 if nbr not in explored:
                     explored.append(nbr)
@@ -214,7 +215,7 @@ class RoomMap:
         Reduces the graph representation to one node per room
         """
 
-        M = copy.deepcopy(self.graph) # Minimal graph (M is reduced version of G)
+        M = copy.deepcopy(self.graph)  # Minimal graph (M is reduced version of G)
 
         # 1. LOCATE AND REDUCE ROOMS  -------------------------------------------------
         G = self.graph
@@ -225,18 +226,18 @@ class RoomMap:
         # Make graph that only contains room clusters
         G_split = copy.deepcopy(G)
         for node in G:
-            if self._is_cluster_node(node) == False:
+            if not self._is_cluster_node(node):
                 G_split = self._remove_node_from_graph(G_split, node)
 
         # Split into individual room clusters
         rooms = []
         nodes_to_check = room_nodes
         while len(nodes_to_check) != 0:
-            start_node = nodes_to_check[0] # Pick start node
-            cluster = self._bfs(G_split, start_node) # Explore cluster
+            start_node = nodes_to_check[0]  # Pick start node
+            cluster = self._bfs(G_split, start_node)  # Explore cluster
             rooms.append(cluster)
             for cluster_node in cluster:
-                nodes_to_check.remove(cluster_node) # Remove cluster nodes from nodes_to_check
+                nodes_to_check.remove(cluster_node)  # Remove cluster nodes from nodes_to_check
 
         # Process each room cluster
         for room in rooms:
@@ -244,20 +245,20 @@ class RoomMap:
             exit_nodes = [node for node in G if self._is_exit_node(G, node, room)]
 
             # Delete all cluster room/corner nodes and insert new node at their avg location
-            avg_x = np.average([G[node]['pos'][0] for node in room]) # Find avg x pos of cluster
-            avg_y = np.average([G[node]['pos'][1] for node in room]) # Find avg y pos of cluster
+            avg_x = np.average([G[node]['pos'][0] for node in room])  # Find avg x pos of cluster
+            avg_y = np.average([G[node]['pos'][1] for node in room])  # Find avg y pos of cluster
 
             for node_to_remove in room:
-                M = self._remove_node_from_graph(M, node_to_remove) # Remove cluster nodes
+                M = self._remove_node_from_graph(M, node_to_remove)  # Remove cluster nodes
 
-            M[room[0]] = {'pos': tuple([avg_x, avg_y]), # New node reuses one of the removed indexes
+            M[room[0]] = {'pos': tuple([avg_x, avg_y]),  # New node reuses one of the removed indexes
                           'neighbors': [],              # to ensure it uses a free index
-                          'is_room': True} # Marks this as a room
+                          'is_room': True}  # Marks this as a room
 
             # Reconnect exit nodes to new node (set neighbors)
             for exit_node in exit_nodes:
-                M[room[0]]['neighbors'].append(exit_node) # Connect room to exit
-                M[exit_node]['neighbors'].append(room[0]) # Connect exit to room
+                M[room[0]]['neighbors'].append(exit_node)  # Connect room to exit
+                M[exit_node]['neighbors'].append(room[0])  # Connect exit to room
 
         # Mark non-room nodes and cleanup
         for node in M:
@@ -266,8 +267,8 @@ class RoomMap:
                     M[node]['is_room'] = True
                 else:
                     M[node]['is_room'] = False
-            M[node].pop('nbr_str', None) # Meaningless in the reduced graph so it is removed
-            M[node].pop('nbr_diag', None) # Meaningless in the reduced graph so it is removed
+            M[node].pop('nbr_str', None)  # Meaningless in the reduced graph so it is removed
+            M[node].pop('nbr_diag', None)  # Meaningless in the reduced graph so it is removed
 
         # 2. LOCATE AND REDUCE HALLWAYS -------------------------------------------------
         G = copy.deepcopy(M)
@@ -278,18 +279,18 @@ class RoomMap:
         # Make graph that only contains hallway nodes
         G_split = copy.deepcopy(G)
         for node in G:
-            if self._is_hallway_node(node) == False:
+            if not self._is_hallway_node(node):
                 G_split = self._remove_node_from_graph(G_split, node)
 
         # Split into individual hallway strings
         hallways = []
         nodes_to_check = hallway_nodes
         while len(nodes_to_check) != 0:
-            start_node = nodes_to_check[0] # Pick start node
-            cluster = self._bfs(G_split, start_node) # Explore cluster
+            start_node = nodes_to_check[0]  # Pick start node
+            cluster = self._bfs(G_split, start_node)  # Explore cluster
             hallways.append(cluster)
             for cluster_node in cluster:
-                nodes_to_check.remove(cluster_node) # Remove cluster nodes from nodes_to_check
+                nodes_to_check.remove(cluster_node)  # Remove cluster nodes from nodes_to_check
 
         # Process each hallway cluster
         for hallway in hallways:
@@ -325,20 +326,22 @@ class RoomMap:
         Draws the graph network on the current figure
         """
 
-        COLORS = {'default': 'black',  # Default node color (unmarked)
-               'corner_ccv': 'red',    # Concave (inside) corner node color
-               'corner_cvx': 'red',    # Convex (outside) corner node color
-               'corner_drw': 'red',    # Doorway corner node color
-                  'hallway': 'black',  # Straight hallway node color
-               'L_junction': 'green',  # Hallway L-junction node color
-               'T_junction': 'green',  # Hallway T-junction node color
-               'X_junction': 'green',  # Hallway X-junction node color
-                 'dead_end': 'purple', # Hallway X-junction node color
-                     'room': 'orange'} # Room node color
-        MARK_CORNERS = True # Apply special color to corner nodes
-        MARK_ROOMS = True # Apply special color to room nodes
-        MARK_JUNCTIONS = True # Apply special color to hallway junction nodes (Bends, T-junctions, etc.)
-        MARK_HALLWAYS = True # Apply special color to hallway nodes
+        COLORS = {
+            'default': 'black',  # Default node color (unmarked)
+            'corner_ccv': 'red',    # Concave (inside) corner node color
+            'corner_cvx': 'red',    # Convex (outside) corner node color
+            'corner_drw': 'red',    # Doorway corner node color
+            'hallway': 'black',  # Straight hallway node color
+            'L_junction': 'green',  # Hallway L-junction node color
+            'T_junction': 'green',  # Hallway T-junction node color
+            'X_junction': 'green',  # Hallway X-junction node color
+            'dead_end': 'purple',  # Hallway X-junction node color
+            'room': 'orange'
+        }  # Room node color
+        MARK_CORNERS = True  # Apply special color to corner nodes
+        MARK_ROOMS = True  # Apply special color to room nodes
+        MARK_JUNCTIONS = True  # Apply special color to hallway junction nodes (Bends, T-junctions, etc.)
+        MARK_HALLWAYS = True  # Apply special color to hallway nodes
 
         G = self.graph
 
@@ -350,7 +353,7 @@ class RoomMap:
                 plt.plot(x, y, color='black')
 
         # Compute colors and positions for all nodes
-        node_colors = {} # Maps node positions to colors
+        node_colors = {}  # Maps node positions to colors
 
         for node in G:
             x = G[node]['pos'][0]
@@ -358,26 +361,26 @@ class RoomMap:
 
             node_colors[tuple([x, y])] = COLORS['default']
 
-            if apply_color == True: # Apply color scheme to different node types
+            if apply_color:  # Apply color scheme to different node types
                 type = self._identify_node(node)
 
                 # Mark room nodes
-                if MARK_ROOMS == True:
+                if MARK_ROOMS:
                     if type == 'room':
                         node_colors[tuple([x, y])] = COLORS[type]
 
                 # Mark corner nodes
-                if MARK_CORNERS == True:
+                if MARK_CORNERS:
                     if type in ['corner_ccv', 'corner_cvx', 'corner_drw']:
                         node_colors[tuple([x, y])] = COLORS[type]
 
                 # Mark hallway junction nodes
-                if MARK_JUNCTIONS == True:
+                if MARK_JUNCTIONS:
                     if type in ['L_junction', 'T_junction', 'X_junction', 'dead_end']:
                         node_colors[tuple([x, y])] = COLORS[type]
 
                 # Mark hallway nodes
-                if MARK_HALLWAYS == True:
+                if MARK_HALLWAYS:
                     if type == 'hallway':
                         node_colors[tuple([x, y])] = COLORS[type]
 
@@ -389,9 +392,10 @@ class RoomMap:
         """
         Draws the reduced graph network on the current figure
         """
-
-        COLORS = {'default': 'black',  # Default node color (unmarked)
-                     'room': 'red'}  # Room node color
+        COLORS = {
+            'default': 'black',  # Default node color (unmarked)
+            'room': 'red'
+        }  # Room node color
 
         G = self.reduced_graph
 
@@ -411,9 +415,9 @@ class RoomMap:
 
             node_colors[tuple([x, y])] = COLORS['default']
 
-            if apply_color == True:
+            if apply_color:
                 # Mark room nodes
-                if G[node]['is_room'] == True:  # Room nodes
+                if G[node]['is_room']:  # Room nodes
                     node_colors[tuple([x, y])] = COLORS['room']
 
         # Plot graph nodes with respective color
@@ -426,11 +430,11 @@ class RoomMap:
         Displays a plot of the map, including the box grid and the graph
         as specified by the parameters
         """
-        f = plt.figure()
-        if plot_grid == True:
+        plt.figure()
+        if plot_grid:
             self.draw_box_grid()
-        if plot_graph == True:
+        if plot_graph:
             self.draw_graph(apply_color=apply_color)
-        if plot_reduced_graph == True:
+        if plot_reduced_graph:
             self.draw_reduced_graph(apply_color=apply_color)
         plt.show()
