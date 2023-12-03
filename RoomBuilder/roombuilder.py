@@ -171,17 +171,17 @@ class RoomMap:
         component of G that is accessible from given node.
         """
         Q = []  # Queue
-        explored = [node]  # List of explored nodes
+        explored = set([node])  # List of explored nodes
         Q.append(node)
 
         while len(Q) != 0:
             v = Q.pop(0)  # Exctract node
             for nbr in G[v]['neighbors']:
                 if nbr not in explored:
-                    explored.append(nbr)
+                    explored.add(nbr)
                     Q.append(nbr)
 
-        return explored
+        return list(explored)
 
     def _is_exit_node(self, G, node: int, room: List[int]) -> bool:
         """
