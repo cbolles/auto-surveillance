@@ -7,6 +7,8 @@ environment:
 sensors:
   - type: Line
     name: Line A
+  - type: Line
+    name: Line B
   - type: Robot
     name: Robot A
     fov_angle: 90

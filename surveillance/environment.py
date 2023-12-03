@@ -21,7 +21,7 @@ class Environment:
         self.map = image
 
         # Load the graph
-        self.room = RoomMap.load(graph_file)
+        self.room_map = RoomMap.load(graph_file)
 
         self.cm_to_pixel = 1 / pixel_to_cm
 

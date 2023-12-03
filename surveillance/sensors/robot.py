@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.axes._axes import Axes
 import numpy as np
 
-from surveillance.sensors.base import Sensor
+from surveillance.sensors.base import Sensor, SensorType
 from surveillance.environment import Environment
 
 
@@ -15,7 +15,7 @@ class Robot(Sensor):
     a configurable FOV and range
     """
     def __init__(self, pixel_to_cm: float, environment: Environment, config):
-        super().__init__(pixel_to_cm, environment, config)
+        super().__init__(pixel_to_cm, environment, config, SensorType.ROBOT)
         self.radius = config.get('radius', 10)
         self.speed = config.get('speed', 1)
         self.fov = config.get('fov', np.pi / 2)
