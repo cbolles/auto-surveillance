@@ -13,7 +13,7 @@ class LineSensorPlacement(PlacementStep):
     def __init__(self, environment: Environment):
         super().__init__(environment)
 
-    def place(self, sensors: List[Sensor]) -> PlacementResult:
+    def place(self, sensors: List[Sensor], original_graph: dict) -> PlacementResult:
         """
         Get the placement of the line sensors in the environment as well as
         how the graph is segmented by the line sensors
@@ -25,7 +25,7 @@ class LineSensorPlacement(PlacementStep):
 
         # No line sensors, do not continue
         if num_line_sensor == 0:
-            return [], self.environment.room_map.reduced_graph
+            return [], original_graph
 
         # Generate all combinations of line sensors
         line_sensor_placements = list(itertools.combinations(hallways, num_line_sensor))
@@ -35,7 +35,7 @@ class LineSensorPlacement(PlacementStep):
         placement_performances: List[int, List] = []
         for placement in line_sensor_placements:
             # Make a copy of the reduced_graph
-            graph = copy.deepcopy(self.environment.room_map.reduced_graph)
+            graph = copy.deepcopy(original_graph)
 
             # Remove the nodes that are in the placement
             for node in placement:
@@ -80,7 +80,7 @@ class LineSensorPlacement(PlacementStep):
         placement_performances: List[int, List] = []
         for placement in placements:
             # Make a copy of the reduced_graph
-            graph = copy.deepcopy(self.environment.room_map.reduced_graph)
+            graph = copy.deepcopy(original_graph)
 
             # Remove the nodes that are in the placement
             for node in placement:
@@ -96,7 +96,7 @@ class LineSensorPlacement(PlacementStep):
         nodes = placement_performances[0][1]
 
         # Update the graph with the nodes removed
-        graph = copy.deepcopy(self.environment.room_map.reduced_graph)
+        graph = copy.deepcopy(original_graph)
         for node in nodes:
             graph = self.environment.room_map._remove_node_from_graph(graph, node)
 

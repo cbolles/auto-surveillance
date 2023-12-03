@@ -1,4 +1,5 @@
 from typing import List
+import copy
 
 from surveillance.environment import Environment
 from surveillance.sensors.base import Sensor
@@ -27,11 +28,11 @@ class Placement:
         placements = []
         sensors = sensors.copy()
 
-        graph = self.environment.room_map.reduced_graph
+        graph = copy.deepcopy(self.environment.room_map.reduced_graph)
 
         for step in self.steps:
             # Get the result of the step
-            result = step.place(sensors)
+            result = step.place(sensors, graph)
 
             # Remove the sensors that were placed from the list of sensors
             # that need to be placed

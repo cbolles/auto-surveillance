@@ -24,5 +24,5 @@ class PlacementStep(ABC):
         self.environment = environment
 
     @abstractmethod
-    def place(self, sensors: List[Sensor]) -> PlacementResult:
+    def place(self, sensors: List[Sensor], graph: dict) -> PlacementResult:
         pass
