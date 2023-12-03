@@ -5,6 +5,7 @@ import cv2 as cv
 import matplotlib.pyplot as plt
 import numpy as np
 import copy
+from typing import List
 
 
 class RoomMap:
@@ -25,7 +26,7 @@ class RoomMap:
         self.graph = self.make_graph()
         self.reduced_graph = self.reduce_graph()
 
-    def make_map_image(self, filename):
+    def make_map_image(self, filename: str) -> None:
         """
         Makes an image visualization of the map
         Filename must contain '.png'
@@ -43,7 +44,7 @@ class RoomMap:
         img = img * 255  # Convert 0-1 grayscale to 0-255 grayscale
         cv.imwrite(filename, img)
 
-    def make_graph(self):
+    def make_graph(self) -> dict:
         """
         Returns a simple graph representation of the map
         """
@@ -84,11 +85,10 @@ class RoomMap:
 
         return graph
 
-    def _identify_node(self, node):
+    def _identify_node(self, node: int) -> str:
         """
         Returns a string that identifies the type of node given
         """
-
         G = self.graph
         type = 'default'  # Default type for node
 
@@ -132,7 +132,7 @@ class RoomMap:
 
         return type
 
-    def _is_cluster_node(self, node):
+    def _is_cluster_node(self, node: int) -> bool:
         """
         Returns True if given node is part of a room cluster in the main graph
         (Room cluster nodes = room nodes and corner nodes)
@@ -150,7 +150,7 @@ class RoomMap:
 
         return False
 
-    def _is_hallway_node(self, node):
+    def _is_hallway_node(self, node: int) -> bool:
         """
         Returns True if given node is part of a straight hallway in the main graph
         False otherwise
@@ -163,7 +163,7 @@ class RoomMap:
 
         return False
 
-    def _bfs(self, G, node):
+    def _bfs(self, G, node: int) -> List[int]:
         """
         Performs BFS starting at given node, and returns the indexes of all explored nodes
         Used to find set of all nodes connected to input node. Does not keep track of
@@ -183,7 +183,7 @@ class RoomMap:
 
         return explored
 
-    def _is_exit_node(self, G, node, room):
+    def _is_exit_node(self, G, node: int, room: List[int]) -> bool:
         """
         Returns True if given node is an exit/doorway node conected to the given
         room cluster, in the given graph. False otherwise
@@ -196,7 +196,7 @@ class RoomMap:
 
         return False
 
-    def _remove_node_from_graph(self, G, node):
+    def _remove_node_from_graph(self, G, node: int) -> dict:
         """
         Returns given graph with node removed and its neighbors disconencted
         """
@@ -210,7 +210,7 @@ class RoomMap:
 
         return G_new
 
-    def reduce_graph(self):
+    def reduce_graph(self) -> dict:
         """
         Reduces the graph representation to one node per room
         """
@@ -315,13 +315,13 @@ class RoomMap:
 
         return M
 
-    def draw_box_grid(self):
+    def draw_box_grid(self) -> None:
         """
         Draws the map box grid on the current figure
         """
         plt.imshow(self.map, cmap='gray', vmin=0, vmax=1)
 
-    def draw_graph(self, apply_color: bool = False):
+    def draw_graph(self, apply_color: bool = False) -> None:
         """
         Draws the graph network on the current figure
         """
@@ -388,7 +388,7 @@ class RoomMap:
         for node in node_colors:
             plt.plot(node[0], node[1], marker='o', color=node_colors[node])
 
-    def draw_reduced_graph(self, apply_color: bool = False):
+    def draw_reduced_graph(self, apply_color: bool = False) -> None:
         """
         Draws the reduced graph network on the current figure
         """
@@ -425,7 +425,7 @@ class RoomMap:
             plt.plot(node[0], node[1], marker='o', color=node_colors[node])
 
     def plot_map(self, plot_grid: bool = True, plot_graph: bool = False, plot_reduced_graph: bool = False,
-                 apply_color: bool = False):
+                 apply_color: bool = False) -> None:
         """
         Displays a plot of the map, including the box grid and the graph
         as specified by the parameters
