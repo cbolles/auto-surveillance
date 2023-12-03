@@ -1,4 +1,4 @@
-from surveillance.sensors.base import Sensor
+from surveillance.sensors.base import Sensor, SensorType
 from matplotlib.axes._axes import Axes
 from matplotlib import patches
 from surveillance.environment import Environment
@@ -9,7 +9,7 @@ from typing import Tuple
 
 class CameraSensor(Sensor):
     def __init__(self, pixel_to_cm: float, environment: Environment, config):
-        super().__init__(pixel_to_cm, environment, config)
+        super().__init__(pixel_to_cm, environment, config, SensorType.CAMERA)
 
         self.fov = config.get('field_of_view', np.inf)
         self.range = config.get('range', np.inf)

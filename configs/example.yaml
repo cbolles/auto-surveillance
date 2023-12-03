@@ -1,11 +1,14 @@
 environment:
   map:
-    image: assets/basic_room.png
+    image: assets/big_map.png
+    graph: assets/big_map.pickle
     pixel_to_cm: 1
   max_timesteps: 500
 sensors:
   - type: Line
     name: Line A
+  - type: Line
+    name: Line B
   - type: Robot
     name: Robot A
     fov_angle: 90

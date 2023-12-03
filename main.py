@@ -1,12 +1,15 @@
 import argparse
-import yaml
 from typing import List
+
+import matplotlib.pyplot as plt
+import numpy as np
+import yaml
+
 from surveillance.adversary import Adversary, AdversaryPool
 from surveillance.environment import Environment
 from surveillance.sensors.base import Sensor
 from surveillance.sensors.factory import SensorFactory
-import matplotlib.pyplot as plt
-import numpy as np
+from surveillance.placement.placement import Placement
 
 
 def main():
@@ -27,7 +30,8 @@ def main():
 
     # Create the environment
     environment = Environment(config['environment']['map']['image'],
-                              pixel_to_cm)
+                              pixel_to_cm,
+                              config['environment']['map']['graph'])
 
     # Pull in the test adversaries
     adversaries: List[Adversary] = []
@@ -45,6 +49,10 @@ def main():
         sensors.append(sensor_factory.construct(sensor_config))
 
     # Determine the ideal positions
+    placer = Placement(environment)
+    placements = placer.get_placement(sensors)
+    placements
+
     for sensor in sensors:
         # TODO: Remove hard coded value
         sensor.place(318, 200, 0)
@@ -54,7 +62,6 @@ def main():
 
     # Simulation loop
     timestep = 0
-    print(max_timesteps)
     while timestep < max_timesteps:
         print('Timestep: {}'.format(timestep))
         plt.cla()

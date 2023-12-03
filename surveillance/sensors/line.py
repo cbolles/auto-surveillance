@@ -1,4 +1,4 @@
-from surveillance.sensors.base import Sensor
+from surveillance.sensors.base import Sensor, SensorType
 from matplotlib.axes._axes import Axes
 from surveillance.environment import Environment
 from surveillance.adversary import AdversaryPool
@@ -8,7 +8,7 @@ from typing import Tuple
 
 class LineSensor(Sensor):
     def __init__(self, pixel_to_cm: float, environment: Environment, config):
-        super().__init__(pixel_to_cm, environment, config)
+        super().__init__(pixel_to_cm, environment, config, SensorType.LINE)
 
         self.range = config.get('range', np.inf)
 
