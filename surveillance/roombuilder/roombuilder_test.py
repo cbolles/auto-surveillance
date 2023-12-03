@@ -51,13 +51,11 @@ very_large_map = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
                   [0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1,1,0],
                   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]
 
-""" Commented out for now to just have the map generation
-for map in [small_map, big_map, very_large_map]:
+for map in [big_map]:
     room = RoomMap(map)
     room.plot_map()
     room.plot_map(plot_grid=True, plot_graph=True, plot_reduced_graph=False, apply_color=True)
     room.plot_map(plot_grid=True, plot_graph=False, plot_reduced_graph=True, apply_color=True)
-"""
 
 # Generate and store a specific map
 room = RoomMap(big_map)
