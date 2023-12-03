@@ -252,7 +252,13 @@ class RoomMap:
 
             M[room[0]] = {'pos': tuple([avg_x, avg_y]), # New node reuses one of the removed indexes
                           'neighbors': [],              # to ensure it uses a free index
-                          'is_room': True} # Marks this as a room
+                          'area': len(room), # Contains the area of the entire room (in boxes)
+                          'type': 'room', # Marks this as a room
+                   'is_dead_end': False}  # True if room only has 1 entry/exit
+
+            # Set dead end flag
+            if len(exit_nodes) == 1:
+                M[room[0]]['is_dead_end'] = True
 
             # Reconnect exit nodes to new node (set neighbors)
             for exit_node in exit_nodes:
@@ -261,11 +267,13 @@ class RoomMap:
 
         # Mark non-room nodes and cleanup
         for node in M:
-            if 'is_room' not in M[node]:
+            if 'type' not in M[node]:
                 if self._identify_node(node) != 'hallway':
-                    M[node]['is_room'] = True
+                    M[node]['type'] = 'junction'
+                    M[node]['area'] = 1 # Set area of jucntions to 1 since it is not set earlier
+                    M[node]['is_dead_end'] = False # Set dead end flag to false since it does not apply
                 else:
-                    M[node]['is_room'] = False
+                    M[node]['type'] = 'hallway'
             M[node].pop('nbr_str', None) # Meaningless in the reduced graph so it is removed
             M[node].pop('nbr_diag', None) # Meaningless in the reduced graph so it is removed
 
@@ -305,7 +313,9 @@ class RoomMap:
 
             M[hallway[0]] = {'pos': tuple([avg_x, avg_y]),  # New node reuses one of the removed indexes
                              'neighbors': [],  # to ensure it uses a free index
-                             'is_room': False}  # Marks this as a room
+                             'area': len(hallway), # Contains the area/length of the entire hallway (in boxes)
+                             'type': 'hallway', # Marks this as a room
+                      'is_dead_end': False}     # Always false since it does not apply
 
             # Reconnect exit nodes to new node (set neighbors)
             for exit_node in exit_nodes:
@@ -385,13 +395,16 @@ class RoomMap:
         for node in node_colors:
             plt.plot(node[0], node[1], marker='o', color=node_colors[node])
 
-    def draw_reduced_graph(self, apply_color: bool = False):
+    def draw_reduced_graph(self, apply_color: bool = True, apply_scaling: bool = True):
         """
         Draws the reduced graph network on the current figure
         """
 
         COLORS = {'default': 'black',  # Default node color (unmarked)
-                     'room': 'red'}  # Room node color
+                     'room': 'red',    # Room node color
+                 'dead_end': 'orange', # Dead end room node color
+                 'junction': 'green',  # Junction node color
+                  'hallway': 'black'}  # Hallway node color
 
         G = self.reduced_graph
 
@@ -403,25 +416,31 @@ class RoomMap:
                 plt.plot(x, y, color='black')
 
         # Compute colors and positions for all nodes
-        node_colors = {}  # Maps node positions to colors
+        node_colors = {}  # Maps node positions to color/area pairs
 
         for node in G:
             x = G[node]['pos'][0]
             y = G[node]['pos'][1]
 
-            node_colors[tuple([x, y])] = COLORS['default']
+            node_colors[tuple([x, y])] = tuple([COLORS['default'], G[node]['area']])
 
             if apply_color == True:
-                # Mark room nodes
-                if G[node]['is_room'] == True:  # Room nodes
-                    node_colors[tuple([x, y])] = COLORS['room']
+                # Mark nodes with appropriate colors, area value, and dead end flags
+                if G[node]['is_dead_end'] == True:
+                    node_colors[tuple([x, y])] = tuple([COLORS['dead_end'], G[node]['area']])
+                else:
+                    node_colors[tuple([x, y])] = tuple([COLORS[G[node]['type']], G[node]['area']])
 
         # Plot graph nodes with respective color
         for node in node_colors:
-            plt.plot(node[0], node[1], marker='o', color=node_colors[node])
+            if apply_scaling == True:
+                plt.plot(node[0], node[1], marker='o',
+                         color=node_colors[node][0], markersize=node_colors[node][1])
+            else:
+                plt.plot(node[0], node[1], marker='o', color=node_colors[node][0])
 
     def plot_map(self, plot_grid: bool = True, plot_graph: bool = False, plot_reduced_graph: bool = False,
-                 apply_color: bool = False):
+                 apply_color: bool = False, apply_scaling: bool = True):
         """
         Displays a plot of the map, including the box grid and the graph
         as specified by the parameters
@@ -432,5 +451,5 @@ class RoomMap:
         if plot_graph == True:
             self.draw_graph(apply_color=apply_color)
         if plot_reduced_graph == True:
-            self.draw_reduced_graph(apply_color=apply_color)
+            self.draw_reduced_graph(apply_color=apply_color, apply_scaling=apply_scaling)
         plt.show()

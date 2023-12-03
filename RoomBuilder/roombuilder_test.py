@@ -54,7 +54,9 @@ very_large_map = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 for map in [small_map, big_map, very_large_map]:
     room = RoomMap(map)
     room.plot_map()
-    room.plot_map(plot_grid=True, plot_graph=True, plot_reduced_graph=False, apply_color=True)
-    room.plot_map(plot_grid=True, plot_graph=False, plot_reduced_graph=True, apply_color=True)
+    room.plot_map(plot_grid=True, plot_graph=True, plot_reduced_graph=False,
+                  apply_color=False, apply_scaling=False)
+    room.plot_map(plot_grid=True, plot_graph=False, plot_reduced_graph=True,
+                  apply_color=True, apply_scaling=True)
 
 RoomMap(big_map).make_map_image("big_map.png")
