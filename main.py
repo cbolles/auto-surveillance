@@ -1,12 +1,11 @@
 import argparse
 import yaml
 from typing import List
-from surveillance.adversary import Adversary
+from surveillance.adversary import Adversary, AdversaryPool
 from surveillance.environment import Environment
 from surveillance.sensors.base import Sensor
 from surveillance.sensors.factory import SensorFactory
 import matplotlib.pyplot as plt
-from time import sleep
 import numpy as np
 
 
@@ -26,14 +25,18 @@ def main():
     pixel_to_cm = config['environment']['map']['pixel_to_cm']
     max_timesteps = config['environment'].get('max_timesteps', np.inf)
 
+    # Create the environment
+    environment = Environment(config['environment']['map']['image'],
+                              pixel_to_cm)
+
     # Pull in the test adversaries
     adversaries: List[Adversary] = []
     for adversary_config in config['adversaries']:
-        adversaries.append(Adversary(pixel_to_cm, adversary_config))
+        adversaries.append(Adversary(pixel_to_cm, adversary_config,
+                                     environment))
 
-    # Create the environment
-    environment = Environment(config['environment']['map']['image'],
-                              pixel_to_cm, adversaries)
+    # Create adversary pool
+    adversary_pool = AdversaryPool(adversaries)
 
     # Construct the various sensors
     sensors: List[Sensor] = []
@@ -47,7 +50,7 @@ def main():
         sensor.place(318, 200, 0)
 
     for adversary in adversaries:
-        adversary.place(350, 211)
+        adversary.place(350, 210, 0)
 
     # Simulation loop
     timestep = 0
@@ -73,9 +76,17 @@ def main():
 
         # Detect adversaries
         for sensor in sensors:
-            if sensor.advisary_detected():
-                print('Adversary detected by sensor in timestep {}'.format(
-                    timestep))
+            if sensor.adversary_detected(adversary_pool):
+                print('Adversary detected by sensor {}'.format(
+                    sensor.name))
+
+        # Update sensors
+        for sensor in sensors:
+            sensor.update()
+
+        # Update adversaries
+        for adversary in adversaries:
+            adversary.update()
 
         # Update loop
         plt.pause(0.0001)

@@ -5,5 +5,14 @@ environment:
   max_timesteps: 500
 sensors:
   - type: Line
+    name: Line A
+  - type: Robot
+    name: Robot A
+    fov_angle: 90
+    range: 50
+    speed: 10
+    angle_resolution: 2
+
 adversaries:
   - radius: 10
+    speed: 5

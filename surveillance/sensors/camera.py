@@ -2,6 +2,7 @@ from surveillance.sensors.base import Sensor
 from matplotlib.axes._axes import Axes
 from matplotlib import patches
 from surveillance.environment import Environment
+from surveillance.adversary import AdversaryPool
 import numpy as np
 from typing import Tuple
 
@@ -76,7 +77,7 @@ class CameraSensor(Sensor):
         # Plot a point at the start
         ax.plot(self.x, self.x, 'bo')
 
-    def adversary_detected(self) -> bool:
+    def adversary_detected(self, adversary_pool: AdversaryPool) -> bool:
         """
         Ray trace and determine if an adversary is detected
         """
@@ -97,7 +98,13 @@ class CameraSensor(Sensor):
                 next_y = self.y + distance * np.sin(self.theta)
 
                 # Check if the next point is in the adversary
-                if self.environment.in_adversary(next_x, next_y):
+                if adversary_pool.in_adversary(next_x, next_y):
                     return True
 
         return False
+
+    def update(self) -> None:
+        """
+        Camera doesn't update between time steps
+        """
+        pass

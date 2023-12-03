@@ -1,6 +1,7 @@
 from surveillance.sensors.base import Sensor
 from matplotlib.axes._axes import Axes
 from surveillance.environment import Environment
+from surveillance.adversary import AdversaryPool
 import numpy as np
 from typing import Tuple
 
@@ -58,7 +59,7 @@ class LineSensor(Sensor):
         # Plot a point at the start
         ax.plot(start_point_x, start_point_y, 'bo')
 
-    def adversary_detected(self) -> bool:
+    def adversary_detected(self, adversary_pool: AdversaryPool) -> bool:
         """
         Ray trace and determine if an adversary is detected
         """
@@ -75,21 +76,14 @@ class LineSensor(Sensor):
             next_x = self.x + distance * np.cos(self.theta)
             next_y = self.y + distance * np.sin(self.theta)
 
-            # TODO: Environment and object checks are unnecesary since the endpoints are already
-            #       calculated taking this into account. The only thing from start to endpoint
-            #       that the ray could collide with is the adversary.
-            '''
-            # Check if the next point is in the environment
-            if not self.environment.in_environment(next_x, next_y):
-                return False
-
-            # Check if the next point is in an object
-            if self.environment.in_object(next_x, next_y):
-                return False
-            '''
-
             # Check if the next point is in the adversary
-            if self.environment.in_adversary(next_x, next_y):
+            if adversary_pool.in_adversary(next_x, next_y):
                 return True
 
         return False
+
+    def update(self) -> None:
+        """
+        Line sensor doesn't change between time steps
+        """
+        pass
