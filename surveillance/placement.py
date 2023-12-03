@@ -2,6 +2,7 @@ from typing import List
 from typing import Tuple
 import itertools
 import copy
+import statistics
 
 from surveillance.environment import Environment
 from surveillance.sensors.base import Sensor, SensorType
@@ -34,6 +35,34 @@ def _get_hallways(room_map: RoomMap) -> List[int]:
     return hallways
 
 
+def _get_sub_graph_sizes(graph: dict) -> List[int]:
+    """
+    Count the number of nodes in each subgraph of the larger graph
+    """
+    sub_graphs: List[set] = []
+
+    for node in graph:
+        sub_graph_index = None
+        # Check if the node is already assigned a subgraph
+        for (index, sub_graph) in enumerate(sub_graphs):
+            if node in sub_graph:
+                sub_graph_index = index
+                break
+
+        # If the node is not assigned a subgraph, make one for it
+        if sub_graph_index is None:
+            new_sub_graph = set()
+            new_sub_graph.add(node)
+            new_sub_graph.update(graph[node]['neighbors'])
+            sub_graphs.append(new_sub_graph)
+        # If the node is assigned a subgraph, add the neighbors to the
+        # subgraph
+        else:
+            sub_graphs[sub_graph_index].update(graph[node]['neighbors'])
+
+    return [len(sub_graph) for sub_graph in sub_graphs]
+
+
 class Placement:
     """
     Handles the logic of determing the "optimal" placements of the given
@@ -42,15 +71,18 @@ class Placement:
     def __init__(self, environment: Environment):
         self.environment = environment
 
-    def get_placement(self, sensors: List[Sensor]) -> List[Tuple[Sensor, Pose]]:
+    def _get_line_sensor_placement(self, sensors: List[Sensor]) -> List[Tuple[Sensor, Pose]]:
         """
-
-        :return: A list that is made up of sensors and their cooresponding
-                 placement
+        Get the placement of the line sensors in the environment as well as
+        how the graph is segmented by the line sensors
         """
         hallways = _get_hallways(self.environment.room_map)
 
         num_line_sensor = len([sensor for sensor in sensors if sensor.sensor_type == SensorType.LINE])
+
+        # No line sensors, do not continue
+        if num_line_sensor == 0:
+            return [], self.environment.room_map.reduced_graph
 
         # Generate all combinations of line sensors
         line_sensor_placements = list(itertools.combinations(hallways, num_line_sensor))
@@ -79,8 +111,60 @@ class Placement:
 
             placement_performances.append((num_cycles, placement))
 
-        # Sort the placements by the number of cycles they create
+        # Sort the placements by the number of cycles left in the graph
         placement_performances.sort(key=lambda x: x[0])
-        placement_performances
+
+        # Keep top placements
+        least_cycles = placement_performances[0][0]
+        top_placements = [placement for placement in placement_performances if placement[0] == least_cycles]
+
+        # Only one combination will remove the most cycles, so use this
+        # combination
+        if len(top_placements) == 0:
+            # Get the nodes of the ideal placements
+            nodes = top_placements[0][1]
+
+            # Update the graph with the nodes removed
+            graph = copy.deepcopy(self.environment.room_map.reduced_graph)
+            for node in nodes:
+                graph = self.environment.room_map._remove_node_from_graph(graph, node)
+
+            # Return the placement and resulting graph
+            return nodes, graph
+
+        # Multiple combinations exist, now determine the size of all graphs
+        placements = [placement[1] for placement in top_placements]
+        placement_performances: List[int, List] = []
+        for placement in placements:
+            # Make a copy of the reduced_graph
+            graph = copy.deepcopy(self.environment.room_map.reduced_graph)
+
+            # Remove the nodes that are in the placement
+            for node in placement:
+                graph = self.environment.room_map._remove_node_from_graph(graph, node)
+
+            graph_sizes = _get_sub_graph_sizes(graph)
+            placement_performances.append((statistics.stdev(graph_sizes), placement))
+
+        # Sort the placements by the number of cycles left in the graph
+        placement_performances.sort(key=lambda x: x[0])
+        print(placement_performances)
+
+        # Get the nodes of the ideal placements
+        nodes = placement_performances[0][1]
+
+        # Update the graph with the nodes removed
+        graph = copy.deepcopy(self.environment.room_map.reduced_graph)
+        for node in nodes:
+            graph = self.environment.room_map._remove_node_from_graph(graph, node)
+        return nodes, graph
+
+    def get_placement(self, sensors: List[Sensor]) -> List[Tuple[Sensor, Pose]]:
+        """
+
+        :return: A list that is made up of sensors and their cooresponding
+                 placement
+        """
+        line_sensor_placements, graph = self._get_line_sensor_placement(sensors)
 
         return []
