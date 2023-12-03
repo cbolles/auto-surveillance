@@ -1,84 +1,27 @@
 from typing import List
-from typing import Tuple
 import itertools
 import copy
 import statistics
 
 from surveillance.environment import Environment
 from surveillance.sensors.base import Sensor, SensorType
-from surveillance.helpers import Pose
-from surveillance.roombuilder.roombuilder import RoomMap
+from surveillance.placement.step import PlacementStep, PlacementResult, Placement
+from surveillance.helpers import _get_hallways, _get_number_cycles, _get_sub_graph_sizes
 
 
-def _get_number_cycles(graph: dict) -> int:
-    """
-    Determine the number of cycles present in the given graph this needs to
-    ignore the bidirectional edges
-    """
-    edges = set()
-    for node in graph:
-        for neighbor in graph[node]['neighbors']:
-            # Make the edge representation, have the smaller node always
-            # come first to avoid duplicates (i.e. (1, 2) and (2, 1))
-            edge = (min(node, neighbor), max(node, neighbor))
-            if edge not in edges:
-                edges.add(edge)
-
-    return len(edges) - len(graph) + 1
-
-
-def _get_hallways(room_map: RoomMap) -> List[int]:
-    hallways = []
-    for node in room_map.reduced_graph:
-        if room_map._is_hallway_node(node):
-            hallways.append(node)
-    return hallways
-
-
-def _get_sub_graph_sizes(graph: dict) -> List[int]:
-    """
-    Count the number of nodes in each subgraph of the larger graph
-    """
-    sub_graphs: List[set] = []
-
-    for node in graph:
-        sub_graph_index = None
-        # Check if the node is already assigned a subgraph
-        for (index, sub_graph) in enumerate(sub_graphs):
-            if node in sub_graph:
-                sub_graph_index = index
-                break
-
-        # If the node is not assigned a subgraph, make one for it
-        if sub_graph_index is None:
-            new_sub_graph = set()
-            new_sub_graph.add(node)
-            new_sub_graph.update(graph[node]['neighbors'])
-            sub_graphs.append(new_sub_graph)
-        # If the node is assigned a subgraph, add the neighbors to the
-        # subgraph
-        else:
-            sub_graphs[sub_graph_index].update(graph[node]['neighbors'])
-
-    return [len(sub_graph) for sub_graph in sub_graphs]
-
-
-class Placement:
-    """
-    Handles the logic of determing the "optimal" placements of the given
-    sensors in the given environment.
-    """
+class LineSensorPlacement(PlacementStep):
     def __init__(self, environment: Environment):
-        self.environment = environment
+        super().__init__(environment)
 
-    def _get_line_sensor_placement(self, sensors: List[Sensor]) -> List[Tuple[Sensor, Pose]]:
+    def place(self, sensors: List[Sensor]) -> PlacementResult:
         """
         Get the placement of the line sensors in the environment as well as
         how the graph is segmented by the line sensors
         """
         hallways = _get_hallways(self.environment.room_map)
 
-        num_line_sensor = len([sensor for sensor in sensors if sensor.sensor_type == SensorType.LINE])
+        line_sensors = [sensor for sensor in sensors if sensor.sensor_type == SensorType.LINE]
+        num_line_sensor = len(line_sensors)
 
         # No line sensors, do not continue
         if num_line_sensor == 0:
@@ -148,7 +91,6 @@ class Placement:
 
         # Sort the placements by the number of cycles left in the graph
         placement_performances.sort(key=lambda x: x[0])
-        print(placement_performances)
 
         # Get the nodes of the ideal placements
         nodes = placement_performances[0][1]
@@ -157,14 +99,10 @@ class Placement:
         graph = copy.deepcopy(self.environment.room_map.reduced_graph)
         for node in nodes:
             graph = self.environment.room_map._remove_node_from_graph(graph, node)
-        return nodes, graph
 
-    def get_placement(self, sensors: List[Sensor]) -> List[Tuple[Sensor, Pose]]:
-        """
+        placements = []
+        for (index, node) in enumerate(nodes):
+            # TODO: Replace with translation logic for node location to pose
+            placements.append(Placement(line_sensors[index], self.environment.room_map.reduced_graph[node]['pos']))
 
-        :return: A list that is made up of sensors and their cooresponding
-                 placement
-        """
-        line_sensor_placements, graph = self._get_line_sensor_placement(sensors)
-
-        return []
+        return PlacementResult(graph=graph, placements=placements)

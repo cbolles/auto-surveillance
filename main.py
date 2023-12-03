@@ -9,7 +9,7 @@ from surveillance.adversary import Adversary, AdversaryPool
 from surveillance.environment import Environment
 from surveillance.sensors.base import Sensor
 from surveillance.sensors.factory import SensorFactory
-from surveillance.placement import Placement
+from surveillance.placement.placement import Placement
 
 
 def main():
