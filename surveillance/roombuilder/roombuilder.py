@@ -34,6 +34,7 @@ class RoomMap:
         self.DIM_Y = len(box_matrix)
 
         self.graph = self.make_graph()
+        self.graph = self._identify_graph()
         self.reduced_graph = self.reduce_graph()
 
     def make_map_image(self, filename: str) -> None:
@@ -67,6 +68,19 @@ class RoomMap:
         """
         with open(filename, 'rb') as f:
             return RenameUnpickler(f).load()
+
+    def _identify_graph(self):
+        """
+        Runs _identify_node() on all nodes of the unreduced graph and stores the
+        result in the 'type' field of each node
+        """
+
+        G = self.graph
+
+        for node in G:
+            G[node]['type'] = self._identify_node(node)
+
+        return G
 
     def make_graph(self) -> dict:
         """
@@ -106,10 +120,6 @@ class RoomMap:
                                 # Diagonals only connect if they do not intersect a corner
                                 graph[nodes[x][y]]['neighbors'].append(nodes[pos[0]][pos[1]])
                                 graph[nodes[x][y]]['nbr_diag'].append(nodes[pos[0]][pos[1]])
-
-        # Before returning, identify all nodes and store their type
-        for node in graph:
-            graph[node]['type'] = self._identify_node(node)
 
         return graph
 
