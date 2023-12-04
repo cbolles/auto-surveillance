@@ -82,9 +82,9 @@ class RoomMap:
                     graph[nodes[x][y]] = {
                         'pos': tuple([y, x]),
                         'neighbors': [],  # Contains all neighbors of the node
+                        'type': 'default', # Contains a string indentifying the node type
                         'nbr_str': [],  # Contains neighbors directly up, down, left and right
-                        'nbr_diag': []
-                    }  # Contains neighbors that connect diagonally
+                        'nbr_diag': []} # Contains neighbors that connect diagonally
                     neighbors = [(x-1, y), (x, y-1), (x+1, y), (x, y+1)]
                     for pos in neighbors:
                         if self.map[pos[0]][pos[1]] != 0:
@@ -97,8 +97,8 @@ class RoomMap:
                         [(x - 1, y), (x, y - 1)],
                         [(x + 1, y), (x, y - 1)],
                         [(x - 1, y), (x, y + 1)],
-                        [(x + 1, y), (x, y + 1)]
-                    ]
+                        [(x + 1, y), (x, y + 1)]]
+
                     for i, pos in enumerate(diagonals):
                         if self.map[pos[0]][pos[1]] != 0:
                             if (self.map[corners[i][0][0]][corners[i][0][1]] != 0) and \
@@ -106,6 +106,10 @@ class RoomMap:
                                 # Diagonals only connect if they do not intersect a corner
                                 graph[nodes[x][y]]['neighbors'].append(nodes[pos[0]][pos[1]])
                                 graph[nodes[x][y]]['nbr_diag'].append(nodes[pos[0]][pos[1]])
+
+        # Before returning, identify all nodes and store their type
+        for node in graph:
+            graph[node]['type'] = self._identify_node(node)
 
         return graph
 
