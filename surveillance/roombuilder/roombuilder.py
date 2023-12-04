@@ -78,7 +78,7 @@ class RoomMap:
         G = self.graph
 
         for node in G:
-            G[node]['type'] = self._identify_node(node)
+            G[node]['raw_type'] = self._identify_node(node)
 
         return G
 
@@ -96,7 +96,7 @@ class RoomMap:
                     graph[nodes[x][y]] = {
                         'pos': tuple([y, x]),
                         'neighbors': [],  # Contains all neighbors of the node
-                        'type': 'default', # Contains a string indentifying the node type
+                        'raw_type': 'default', # Contains a string indentifying the unreduced node type
                         'nbr_str': [],  # Contains neighbors directly up, down, left and right
                         'nbr_diag': []} # Contains neighbors that connect diagonally
                     neighbors = [(x-1, y), (x, y-1), (x+1, y), (x, y+1)]
@@ -315,6 +315,7 @@ class RoomMap:
                     M[node]['type'] = 'hallway'
             M[node].pop('nbr_str', None) # Meaningless in the reduced graph so it is removed
             M[node].pop('nbr_diag', None) # Meaningless in the reduced graph so it is removed
+            M[node].pop('raw_type', None) # Meaningless in the reduced graph so it is removed
 
         # 2. LOCATE AND REDUCE HALLWAYS -------------------------------------------------
         G = copy.deepcopy(M)
