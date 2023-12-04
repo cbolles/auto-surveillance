@@ -61,7 +61,7 @@ class RoomMap:
         with open(filename, 'wb') as f:
             pickle.dump(self, f)
 
-    def load(filename: str):
+    def load(self, filename: str):
         """
         Load a serialized RoomMap object from a file
         """
