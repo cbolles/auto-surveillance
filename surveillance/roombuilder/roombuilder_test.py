@@ -63,3 +63,7 @@ for map in [small_map, big_map, very_large_map]:
 room = RoomMap(very_large_map)
 room.make_map_image("assets/very_large_map.png")
 room.save('assets/very_large_map.pickle')
+
+room = RoomMap(big_map)
+room.make_map_image("assets/big_map.png")
+room.save('assets/big_map.pickle')

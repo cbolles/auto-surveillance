@@ -176,14 +176,14 @@ class RoomMap:
         (Room cluster nodes = room nodes and corner nodes)
         False otherwise
         """
-        type = self._identify_node(node)
+        type = self.graph[node]['raw_type']
 
         # Room nodes
         if type == 'room':  # Room nodes
             return True
 
         # Corner nodes
-        if (type == 'corner_ccv') | (type == 'corner_cvx') | (type == 'corner_drw'):
+        if self._is_corner_node(node) == True:
             return True
 
         return False
@@ -231,6 +231,19 @@ class RoomMap:
             if node not in room:
                 if room_node in G[node]['neighbors']:
                     return True
+
+        return False
+
+    def _is_corner_node(self, node: int) -> bool:
+        """
+        Returns True if given node is an exit/doorway node conected to the given
+        room cluster, in the given graph. False otherwise
+        """
+
+        type = self.graph[node]['raw_type']
+
+        if (type == 'corner_ccv') | (type == 'corner_cvx') | (type == 'corner_drw'):
+            return True
 
         return False
 
@@ -286,14 +299,18 @@ class RoomMap:
             avg_x = np.average([G[node]['pos'][0] for node in room])  # Find avg x pos of cluster
             avg_y = np.average([G[node]['pos'][1] for node in room])  # Find avg y pos of cluster
 
+            # Exctract corners
+            corners = list([node for node in room if self._is_corner_node(node)])
+
             for node_to_remove in room:
                 M = self._remove_node_from_graph(M, node_to_remove)  # Remove cluster nodes
 
-            M[room[0]] = {'pos': tuple([avg_x, avg_y]),  # New node reuses one of the removed indexes
+            M[room[0]] = {'pos': tuple([avg_x, avg_y]), # New node reuses one of the removed indexes
                           'neighbors': [],              # to ensure it uses a free index
                           'area': len(room), # Contains the area of the entire room (in boxes)
-                          'type': 'room', # Marks this as a room
-                   'is_dead_end': False}  # True if room only has 1 entry/exit
+                          'type': 'room',  # Marks this as a room
+                       'corners': corners, # List of node indexes comprising the room corner nodes
+                   'is_dead_end': False}   # True if room only has 1 entry/exit
 
             # Set dead end flag
             if len(exit_nodes) == 1:

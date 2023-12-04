@@ -32,7 +32,10 @@ class LineSensorPlacement(PlacementStep):
         robot step what rooms (despite being large) are already mostly covered by cameras
         """
 
-        pass
+        # Unpakc graphs from RoomMap object
+        G = self.environment.room_map.graph
+        M = self.environment.room_map.reduced_graph
 
+        # Find room with largest unsurveiled area
 
         #return PlacementResult(graph=graph, placements=placements)
