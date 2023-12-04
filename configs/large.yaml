@@ -1,0 +1,27 @@
+environment:
+  map:
+    image: assets/very_large_map.png
+    graph: assets/very_large_map.pickle
+    pixel_to_cm: 1
+  max_timesteps: 500
+sensors:
+  - type: Line
+    name: Line A
+  - type: Line
+    name: Line B
+  - type: Line
+    name: Line C
+  - type: Line
+    name: Line D
+  - type: Line
+    name: Line E
+  - type: Line
+    name: Line F
+  - type: Line
+    name: Line G
+  - type: Line
+    name: Line H
+
+adversaries:
+  - radius: 10
+    speed: 5

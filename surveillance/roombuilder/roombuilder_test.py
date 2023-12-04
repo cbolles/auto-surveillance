@@ -60,6 +60,6 @@ for map in [small_map, big_map, very_large_map]:
                   apply_color=True, apply_scaling=True)
 
 # Generate and store a specific map
-room = RoomMap(big_map)
-room.make_map_image("assets/big_map.png")
-room.save('assets/big_map.pickle')
+room = RoomMap(very_large_map)
+room.make_map_image("assets/very_large_map.png")
+room.save('assets/very_large_map.pickle')
