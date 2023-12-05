@@ -82,7 +82,7 @@ def compute_angle(x1, y1, x2, y2):
     dx = x2 - x1 # > cosine(theta)
     dy = y2 - y1 # > sine(theta)
 
-    theta = np.arctan2(dy/dx)
+    theta = np.arctan2(dy, dx) # arctan(dy/dx)
 
     return theta
 

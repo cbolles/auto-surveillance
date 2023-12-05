@@ -12,7 +12,8 @@ sensors:
 
   - type: Camera
     name: Cam 1
-    range: 200
+    range: 400
+    field_of_view: 25
   - type: Camera
     name: Cam 2
     range: 200
@@ -21,6 +22,12 @@ sensors:
     range: 200
   - type: Camera
     name: Cam 4
+    range: 200
+  - type: Camera
+    name: Cam 5
+    range: 200
+  - type: Camera
+    name: Cam 6
     range: 200
 
 adversaries:

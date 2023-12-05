@@ -12,13 +12,14 @@ class CameraSensor(Sensor):
     def __init__(self, pixel_to_cm: float, environment: Environment, config):
         super().__init__(pixel_to_cm, environment, config, SensorType.CAMERA)
 
-        self.fov = config.get('field_of_view', np.pi/4)
+        self.fov = config.get('field_of_view', 45)
+        self.fov = self.fov * np.pi/180 # Convert deg to rad
         self.range = config.get('range', np.inf)
 
         DEG_PER_RAY = 3
 
         # Number of rays for raytracing depends on fov (rounded up)
-        self.num_rays = np.ceil(self.fov / DEG_PER_RAY)
+        self.num_rays = int(np.ceil(self.fov / DEG_PER_RAY))
 
     def is_inside_viewcone(self, pose, px, py):
         """
@@ -102,7 +103,7 @@ class CameraSensor(Sensor):
         ax.add_patch(arc)
 
         # Plot a point at the start
-        ax.plot(self.x, self.x, 'bo')
+        ax.plot(self.x, self.y, 'bo')
 
     def adversary_detected(self, adversary_pool: AdversaryPool) -> bool:
         """
@@ -115,7 +116,7 @@ class CameraSensor(Sensor):
                                      self.num_rays, endpoint=True):
 
             # Get ray endpoint and calculate ray length
-            end_point_x, end_point_y = self._get_endpoint()
+            end_point_x, end_point_y = self._get_endpoint(ray_angle)
             length = np.sqrt((end_point_x - self.x)**2 + (end_point_y - self.y)**2)
 
             # Check in 1 cm increments from start point to end point

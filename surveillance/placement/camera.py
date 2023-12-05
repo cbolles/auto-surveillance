@@ -16,9 +16,10 @@ class CameraSensorPlacement(PlacementStep):
         """
         Computes area inside given room that is covered by given camera sensor
         with particular placement (Assumes the placement is inside the room)
+        Outputs list of covered nodes, the length of which is the covered area!
         """
 
-        coverage = 0
+        covered_nodes = []
         for node in room:
             # First compute the coordinates of the node in pixel space
             px, py = node_to_px(self.environment.room_map.graph[node]['pos'],
@@ -26,9 +27,9 @@ class CameraSensorPlacement(PlacementStep):
 
             # Then check if point is covered by camera
             if camera.is_inside_viewcone(pose, px, py) == True:
-                coverage += 1
+                covered_nodes.append(node)
 
-        return coverage
+        return covered_nodes
 
     def place(self, sensors: List[Sensor], original_graph: dict) -> PlacementResult:
         """
@@ -62,34 +63,44 @@ class CameraSensorPlacement(PlacementStep):
 
         for camera in sensors:
 
-            # Find room with largest unsurveiled area
-            area_node_pairs = [(node, M[node]['area']) for node in M if 'area' in M[node]]
-            area_node_pairs.sort(key=lambda x : x[1]) # Sort by area
-            largest_room = area_node_pairs[-1] # Select largest area
+            # Find room with largest unsurveiled area (and sort rooms by unsurveiled area)
+            area_node_pairs = [(node, M[node]['area']) for node in M if M[node]['type'] == 'room']
+            area_node_pairs.sort(key=lambda x : x[1], reverse=True) # Sort by area
+            room = area_node_pairs[0][0] # Select largest area and pick node
 
             # For all corners in room, measure coverage of camera placement and pick highest
-            best_coverage = 0
+            best_coverage = []
             best_pose = Pose(-1, -1, 0)
-            for corner in M[largest_room]['corners']:
-                x_pos = G[corner]['pos'][0]
-                y_pos = G[corner]['pos'][1]
+            chosen_room = -1
+            # Iterate through rooms, biggest to smallest to find the best placement:
+            for room_pair in area_node_pairs:
+                room = room_pair[0]
+                for corner in M[room]['corners']:
+                    if G[corner]['raw_type'] != 'corner_cvx': # Exclude non-ideal convex corners
+                        x_pos = G[corner]['pos'][0]
+                        y_pos = G[corner]['pos'][1]
 
-                # Compute camera placement angle (aiming towards room centroid)
-                x_avg = M[largest_room]['pos'][0]
-                y_avg = M[largest_room]['pos'][1]
-                theta = compute_angle(x_pos, y_pos, x_avg, y_avg)
+                        # Compute camera placement angle (aiming towards room centroid)
+                        x_avg = M[room]['pos'][0]
+                        y_avg = M[room]['pos'][1]
+                        theta = compute_angle(x_pos, y_pos, x_avg, y_avg)
 
-                # Measure coverage and track the corner with the highest value
-                pose = Pose(x=node_to_px(x_pos), y=node_to_px(y_pos), theta=theta)
-                room_nodes = M[largest_room]['room_nodes']
-                coverage = self._compute_coverage(camera, pose, room_nodes)
-                if coverage > best_coverage:
-                    best_coverage = coverage
-                    best_pose = pose
+                        # Measure coverage and track the corner with the highest value
+                        px, py = node_to_px(tuple([x_pos, y_pos]),
+                                            self.environment.room_map.BOX_SIZE)
+                        pose = Pose(x=px, y=py, theta=theta)
+                        room_nodes = M[room]['room_nodes']
+                        coverage = self._compute_coverage(camera, pose, room_nodes)
+                        if len(coverage) > len(best_coverage):
+                            best_coverage = coverage
+                            best_pose = pose
+                            chosen_room = room
 
             # Once the best placement is found, place camera there, and update room area
             placements.append(Placement(camera, pose=best_pose))
-            M[largest_room]['area'] -= best_coverage # This way the 'area' of the room is
-                                                     # only the unsurveiled area (useful)
+            M[chosen_room]['area'] -= len(best_coverage) # This way the 'area' of the room is
+                                                         # only the unsurveiled area (useful)
+            for covered_node in best_coverage:
+                M[chosen_room]['room_nodes'].remove(covered_node) # Nodes can only be covered once
 
         return PlacementResult(graph=M, placements=placements)
