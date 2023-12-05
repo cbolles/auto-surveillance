@@ -310,6 +310,7 @@ class RoomMap:
                           'area': len(room), # Contains the area of the entire room (in boxes)
                           'type': 'room',  # Marks this as a room
                        'corners': corners, # List of node indexes comprising the room corner nodes
+                    'room_nodes': room,    # List of node indexes comprising the all the room nodes
                    'is_dead_end': False}   # True if room only has 1 entry/exit
 
             # Set dead end flag
