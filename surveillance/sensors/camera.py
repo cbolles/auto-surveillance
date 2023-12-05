@@ -5,19 +5,46 @@ from surveillance.environment import Environment
 from surveillance.adversary import AdversaryPool
 import numpy as np
 from typing import Tuple
+from surveillance.helpers import _compute_angle
 
 
 class CameraSensor(Sensor):
     def __init__(self, pixel_to_cm: float, environment: Environment, config):
         super().__init__(pixel_to_cm, environment, config, SensorType.CAMERA)
 
-        self.fov = config.get('field_of_view', np.inf)
+        self.fov = config.get('field_of_view', np.pi/4)
         self.range = config.get('range', np.inf)
 
         DEG_PER_RAY = 3
 
         # Number of rays for raytracing depends on fov (rounded up)
         self.num_rays = np.ceil(self.fov / DEG_PER_RAY)
+
+    def is_inside_viewcone(self, pose, px, py):
+        """
+        Returns true if given point (in pixel coordinates) is inside
+        the view cone of the camera (DOES NOT CHECK VISIBILITY)
+        """
+
+        # For point to be inside viewcone, it has to be within the FOV angle
+        # and has to be at a distance from the camera smaller than its max range
+        cx = pose.x
+        cy = pose.y
+        theta = pose.theta
+
+        # Check range (faster, so done first)
+        distance = np.sqrt((px - cx)**2 + (py - cy)**2)
+        if distance > self.range:
+            return False
+
+        # Check FOV cone
+        max_angle = theta + self.fov/2 # If angle to point exceeds this, point is outside the cone
+        min_angle = theta - self.fov/2 # If angle to point is below this, point is outside the cone
+        angle_to_point = _compute_angle(cx, cy, px, py)
+        if (angle_to_point < min_angle) or (angle_to_point > max_angle):
+            return False
+
+        return True
 
     def _get_endpoint(self, theta) -> Tuple[float, float]:
         """

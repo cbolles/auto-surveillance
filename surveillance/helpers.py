@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import List
 
+import numpy as np
+
 from surveillance.roombuilder.roombuilder import RoomMap
 
 
@@ -62,3 +64,26 @@ def _get_sub_graph_sizes(graph: dict) -> List[int]:
             sub_graphs[sub_graph_index].update(graph[node]['neighbors'])
 
     return [len(sub_graph) for sub_graph in sub_graphs]
+
+def compute_angle(x1, y1, x2, y2):
+    """
+    Finds the counterclockwise angle of the line going from x1, y1, to x2, y2
+    (In radians)
+    """
+
+    dx = x2 - x1 # > cosine(theta)
+    dy = y2 - y1 # > sine(theta)
+
+    theta = np.arctan2(dy/dx)
+
+    return theta
+
+def node_to_px(node_pos, box_size):
+    """
+    Translates node position in graphspace to pixel coordinates
+    """
+
+    px = (node_pos[0] + 0.5) * box_size
+    py = (node_pos[1] + 0.5) * box_size
+
+    return px, py

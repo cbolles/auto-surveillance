@@ -5,30 +5,30 @@ import numpy as np
 from surveillance.environment import Environment
 from surveillance.sensors.base import Sensor, SensorType
 from surveillance.placement.step import PlacementStep, PlacementResult, Placement
-from surveillance.helpers import Pose
+from surveillance.helpers import Pose, compute_angle, node_to_px
 
 
 class CameraSensorPlacement(PlacementStep):
     def __init__(self, environment: Environment):
         super().__init__(environment)
 
-    def _compute_angle(self, x1, y1, x2, y2):
+    def _compute_coverage(self, camera, pose, room):
         """
-        Finds the counterclockwise angle of the line going from x1, y1, to x2, y2
-        (In radians)
+        Computes area inside given room that is covered by given camera sensor
+        with particular placement (Assumes the placement is inside the room)
         """
 
-        dx = x2 - x1 # > cosine(theta)
-        dy = y2 - y1 # > sine(theta)
+        coverage = 0
+        for node in room:
+            # First compute the coordinates of the node in pixel space
+            px, py = node_to_px(self.environment.room_map.graph[node]['pos'],
+                                self.environment.room_map.BOX_SIZE)
 
-        theta = np.arctan2(dy/dx)
+            # Then check if point is covered by camera
+            if camera.is_inside_viewcone(pose, px, py) == True:
+                coverage += 1
 
-        return theta
-
-    def _compute_coverage(self, camera, pose):
-        """
-        Computes area of
-        """
+        return coverage
 
     def place(self, sensors: List[Sensor], original_graph: dict) -> PlacementResult:
         """
@@ -77,17 +77,17 @@ class CameraSensorPlacement(PlacementStep):
                 # Compute camera placement angle (aiming towards room centroid)
                 x_avg = M[largest_room]['pos'][0]
                 y_avg = M[largest_room]['pos'][1]
-                theta = self._compute_angle(x_pos, y_pos, x_avg, y_avg)
+                theta = compute_angle(x_pos, y_pos, x_avg, y_avg)
 
                 # Measure coverage and track the corner with highest value
-                pose = Pose(x=x_pos, y=y_pos, theta=theta)
-                room_nodes = M[largest_room][]
+                pose = Pose(x=node_to_px(x_pos), y=node_to_px(y_pos), theta=theta)
+                room_nodes = M[largest_room]['room_nodes']
                 coverage = self._compute_coverage(camera, pose, room_nodes)
                 if coverage > best_coverage:
                     best_coverage = coverage
                     best_pose = pose
 
-            # Once best placement is found, place camera there, and update room area
+            # Once the best placement is found, place camera there, and update room area
             placements.append(Placement(camera, pose=best_pose))
             M[largest_room]['area'] -= best_coverage # This way the 'area' of the room is
                                                      # only the unsurveiled area (useful)
