@@ -31,7 +31,7 @@ class LineSensorPlacement(PlacementStep):
 
         # Go through all combinations and calculate the number of cycles
         # each combination would create
-        placement_performances: List[int, List] = []
+        placement_performances: List[Tuple[int, List]] = []
         for placement in line_sensor_placements:
             # Make a copy of the reduced_graph
             graph = copy.deepcopy(original_graph)
@@ -72,7 +72,7 @@ class LineSensorPlacement(PlacementStep):
         placement are removed. The placement with the lowest standard
         deviation of subgraph sizes will be returned.
         """
-        placement_performances: List[int, List] = []
+        placement_performances: List[Tuple[int, List]] = []
         for placement in least_cycles:
             # Make a copy of the reduced_graph
             graph = copy.deepcopy(original_graph)
@@ -109,7 +109,7 @@ class LineSensorPlacement(PlacementStep):
 
         # No line sensors, do not continue
         if num_line_sensor == 0:
-            return [], original_graph
+            return PlacementResult(placements=[], graph=original_graph)
 
         least_cycles = self._get_least_cycles(original_graph, line_sensors, hallways)
 
@@ -125,7 +125,7 @@ class LineSensorPlacement(PlacementStep):
                 graph = self.environment.room_map._remove_node_from_graph(graph, node)
 
             # Return the placement and resulting graph
-            return nodes, graph
+            return PlacementResult(placements=nodes, graph=graph)
 
         lowest_std = self._get_lowest_stddev(original_graph, line_sensors, least_cycles)
 

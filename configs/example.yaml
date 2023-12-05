@@ -9,6 +9,9 @@ sensors:
     name: Line A
   - type: Line
     name: Line B
+  - type: Robot
+    name: Robot A
+    speed: 10
 
 adversaries:
   - radius: 10

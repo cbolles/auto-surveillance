@@ -16,7 +16,7 @@ class Placement:
 @dataclass
 class PlacementResult:
     graph: dict
-    placements: Placement
+    placements: List[Placement]
 
 
 class PlacementStep(ABC):
