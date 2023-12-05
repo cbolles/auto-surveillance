@@ -1,0 +1,28 @@
+environment:
+  map:
+    image: assets/big_map.png
+    graph: assets/big_map.pickle
+    pixel_to_cm: 1
+  max_timesteps: 500
+sensors:
+  - type: Line
+    name: Line A
+  - type: Line
+    name: Line B
+
+  - type: Camera
+    name: Cam 1
+    range: 200
+  - type: Camera
+    name: Cam 2
+    range: 200
+  - type: Camera
+    name: Cam 3
+    range: 200
+  - type: Camera
+    name: Cam 4
+    range: 200
+
+adversaries:
+  - radius: 10
+    speed: 5
