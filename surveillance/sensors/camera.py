@@ -5,7 +5,7 @@ from surveillance.environment import Environment
 from surveillance.adversary import AdversaryPool
 import numpy as np
 from typing import Tuple
-from surveillance.helpers import _compute_angle
+from surveillance.helpers import compute_angle
 
 
 class CameraSensor(Sensor):

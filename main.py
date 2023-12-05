@@ -51,7 +51,6 @@ def main():
     # Determine the ideal positions
     placer = Placement(environment)
     placements = placer.get_placement(sensors)
-    print(placements)
 
     for placement in placements.placements:
         # TODO: Remove hard coded value

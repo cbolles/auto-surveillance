@@ -38,6 +38,14 @@ def _get_hallways(room_map: RoomMap) -> List[int]:
     return hallways
 
 
+def _get_rooms(room_map: RoomMap) -> List[int]:
+    rooms = []
+    for node in room_map.reduced_graph:
+        if not room_map._is_hallway_node(node):
+            rooms.append(node)
+    return rooms
+
+
 def _get_sub_graph_sizes(graph: dict) -> List[int]:
     """
     Count the number of nodes in each subgraph of the larger graph

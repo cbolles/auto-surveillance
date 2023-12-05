@@ -4,6 +4,7 @@ import copy
 from surveillance.environment import Environment
 from surveillance.sensors.base import Sensor
 from surveillance.placement.line import LineSensorPlacement
+from surveillance.placement.robot import RobotPlacement
 from surveillance.placement.step import PlacementStep, PlacementResult
 
 
@@ -16,7 +17,8 @@ class Placement:
         self.environment = environment
 
         self.steps: List[PlacementStep] = [
-            LineSensorPlacement(self.environment)
+            LineSensorPlacement(self.environment),
+            RobotPlacement(self.environment)
         ]
 
     def get_placement(self, sensors: List[Sensor]) -> PlacementResult:
