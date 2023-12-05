@@ -5,7 +5,7 @@ from surveillance.environment import Environment
 from surveillance.adversary import AdversaryPool
 import numpy as np
 from typing import Tuple
-from surveillance.helpers import _compute_angle
+from surveillance.helpers import compute_angle
 
 
 class CameraSensor(Sensor):
@@ -40,7 +40,7 @@ class CameraSensor(Sensor):
         # Check FOV cone
         max_angle = theta + self.fov/2 # If angle to point exceeds this, point is outside the cone
         min_angle = theta - self.fov/2 # If angle to point is below this, point is outside the cone
-        angle_to_point = _compute_angle(cx, cy, px, py)
+        angle_to_point = compute_angle(cx, cy, px, py)
         if (angle_to_point < min_angle) or (angle_to_point > max_angle):
             return False
 

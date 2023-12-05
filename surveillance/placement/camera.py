@@ -79,7 +79,7 @@ class CameraSensorPlacement(PlacementStep):
                 y_avg = M[largest_room]['pos'][1]
                 theta = compute_angle(x_pos, y_pos, x_avg, y_avg)
 
-                # Measure coverage and track the corner with highest value
+                # Measure coverage and track the corner with the highest value
                 pose = Pose(x=node_to_px(x_pos), y=node_to_px(y_pos), theta=theta)
                 room_nodes = M[largest_room]['room_nodes']
                 coverage = self._compute_coverage(camera, pose, room_nodes)
