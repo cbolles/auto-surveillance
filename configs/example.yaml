@@ -12,6 +12,9 @@ sensors:
   - type: Robot
     name: Robot A
     speed: 10
+  - type: Camera
+    name: Camera A
+    range: 200
 
 adversaries:
   - radius: 10
