@@ -61,6 +61,7 @@ class CameraSensorPlacement(PlacementStep):
 
         placements = []
 
+        sensors = [sensor for sensor in sensors if sensor.sensor_type == SensorType.CAMERA]
         for camera in sensors:
 
             # Find room with largest unsurveiled area (and sort rooms by unsurveiled area)
