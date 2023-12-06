@@ -13,13 +13,14 @@ class CameraSensor(Sensor):
         super().__init__(pixel_to_cm, environment, config, SensorType.CAMERA)
 
         self.fov = config.get('field_of_view', 45)
-        self.fov = self.fov * np.pi/180 # Convert deg to rad
         self.range = config.get('range', np.inf)
 
-        DEG_PER_RAY = 1
+        DEG_PER_RAY = 3
 
         # Number of rays for raytracing depends on fov (rounded up)
         self.num_rays = int(np.ceil(self.fov / DEG_PER_RAY))
+
+        self.fov = self.fov * np.pi/180 # Convert deg to rad
 
     def is_inside_viewcone(self, pose, px, py):
         """
