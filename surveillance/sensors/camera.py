@@ -16,7 +16,7 @@ class CameraSensor(Sensor):
         self.fov = self.fov * np.pi/180 # Convert deg to rad
         self.range = config.get('range', np.inf)
 
-        DEG_PER_RAY = 3
+        DEG_PER_RAY = 1
 
         # Number of rays for raytracing depends on fov (rounded up)
         self.num_rays = int(np.ceil(self.fov / DEG_PER_RAY))
@@ -75,7 +75,7 @@ class CameraSensor(Sensor):
 
         return next_x, next_y
 
-    def display(self, ax: Axes) -> None:
+    def display(self, ax: Axes, color='b') -> None:
         if self.x is None or self.y is None or self.theta is None:
             raise Exception('Cannot display before sensor is placed')
 
@@ -95,7 +95,7 @@ class CameraSensor(Sensor):
         for angle in [self.theta - self.fov/2, self.theta + self.fov/2]:
             max_x = self.x + self.range * np.cos(angle)
             max_y = self.y + self.range * np.sin(angle)
-            ax.plot([self.x, max_x], [self.y, max_y], 'b-')
+            ax.plot([self.x, max_x], [self.y, max_y], str(color+'-'))
         # Plot cone arc
         arc = patches.Arc((self.x, self.y), self.range, self.range,
                           angle=self.theta, fill=False,
@@ -103,7 +103,7 @@ class CameraSensor(Sensor):
         ax.add_patch(arc)
 
         # Plot a point at the start
-        ax.plot(self.x, self.y, 'bo')
+        ax.plot(self.x, self.y, str(color+'o'))
 
     def adversary_detected(self, adversary_pool: AdversaryPool) -> bool:
         """
@@ -122,12 +122,14 @@ class CameraSensor(Sensor):
             # Check in 1 cm increments from start point to end point
             for distance in np.arange(0, length, 1):
                 # Calculate the next point
-                next_x = self.x + distance * np.cos(self.theta)
-                next_y = self.y + distance * np.sin(self.theta)
+                next_x = self.x + distance * np.cos(ray_angle)
+                next_y = self.y + distance * np.sin(ray_angle)
 
                 # Check if the next point is in the adversary
                 if adversary_pool.in_adversary(next_x, next_y):
                     return True
+
+                distance += 1
 
         return False
 

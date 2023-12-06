@@ -84,6 +84,7 @@ def main():
         # Detect adversaries
         for sensor in sensors:
             if sensor.adversary_detected(adversary_pool):
+                sensor.display(ax, color='r')
                 print('Adversary detected by sensor {}'.format(
                     sensor.name))
 

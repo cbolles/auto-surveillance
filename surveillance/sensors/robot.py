@@ -51,7 +51,7 @@ class Robot(Sensor):
 
         return next_x, next_y
 
-    def display(self, ax: Axes) -> None:
+    def display(self, ax: Axes, color='b') -> None:
         """
         Display robot as a point
         """

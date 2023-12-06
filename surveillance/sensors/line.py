@@ -41,7 +41,7 @@ class LineSensor(Sensor):
 
         return next_x, next_y
 
-    def display(self, ax: Axes) -> None:
+    def display(self, ax: Axes, color='b') -> None:
         if self.x is None or self.y is None or self.theta is None:
             raise Exception('Cannot display before sensor is placed')
 

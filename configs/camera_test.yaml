@@ -5,11 +5,6 @@ environment:
     pixel_to_cm: 1
   max_timesteps: 500
 sensors:
-  - type: Line
-    name: Line A
-  - type: Line
-    name: Line B
-
   - type: Camera
     name: Cam 1
     range: 400
