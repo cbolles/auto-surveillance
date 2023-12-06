@@ -28,6 +28,7 @@ class LineSensorPlacement(PlacementStep):
         # could be placed on
         num_line_sensor = len(line_sensors)
         line_sensor_placements = list(itertools.combinations(hallways, num_line_sensor))
+        print('Number of combinations: {}'.format(len(line_sensor_placements)))
 
         # Go through all combinations and calculate the number of cycles
         # each combination would create
@@ -106,6 +107,8 @@ class LineSensorPlacement(PlacementStep):
 
         line_sensors = [sensor for sensor in sensors if sensor.sensor_type == SensorType.LINE]
         num_line_sensor = len(line_sensors)
+
+        print('Number of hallways: {}, Number of line sensors: {}'.format(len(hallways), num_line_sensor))
 
         # No line sensors, do not continue
         if num_line_sensor == 0:
